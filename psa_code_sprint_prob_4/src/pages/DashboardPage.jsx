@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import UserProfileCard from '../components/UserProfileCard';
 import CareerRecommendations from '../components/CareerRecommendations';
 import ChatbotWidget from '../components/ChatbotWidget';
+import LeadershipPotentialCard from '../components/LeadershipPotential';
 
 function DashboardPage({ employeeId }) {
     // 1. Add state to manage the current theme
-    const [theme, setTheme] = useState('light'); // 'light' or 'dark'
+    const [theme, setTheme] = useState('dark'); // 'light' or 'dark'
 
     // 2. Function to toggle the theme
     const toggleTheme = () => {
@@ -16,7 +17,7 @@ function DashboardPage({ employeeId }) {
     const currentStyles = getStyles(theme);
 
     return (
-        <div style={currentStyles.appContainer}>
+        <div class={theme} style={currentStyles.appContainer}>
             <header style={currentStyles.header}>
                 <h1>PSA Employee Growth Platform</h1>
                 {/* 4. Add the theme toggle button */}
@@ -25,18 +26,18 @@ function DashboardPage({ employeeId }) {
                 </button>
             </header>
             <div style={currentStyles.dashboardLayout}>
-                {/* Top section with two equal columns */}
                 <div style={currentStyles.topRow}>
                     <div style={currentStyles.topCard}>
-                        {/* 5. Pass the dynamic styles down to children */}
                         <UserProfileCard employeeId={employeeId} styles={currentStyles} theme={theme} />
                     </div>
                     <div style={currentStyles.topCard}>
                         <CareerRecommendations employeeId={employeeId} styles={currentStyles} theme={theme} />
                     </div>
+                    <div style={currentStyles.topCard}>
+                        <LeadershipPotentialCard employeeId={employeeId} />
+                    </div>
                 </div>
 
-                {/* Bottom section for the chatbot */}
                 <div style={currentStyles.bottomRow}>
                     <ChatbotWidget employeeId={employeeId} styles={currentStyles} theme={theme} />
                 </div>
@@ -51,7 +52,7 @@ const themes = {
         cardBg: 'white',
         text: '#333',
         subtleText: '#555',
-        headerBg: '#003366',
+        headerBg: '#000000ff',
         headerText: 'white',
         accent: '#007bff',
         borderColor: '#e0e0e0',
@@ -63,7 +64,7 @@ const themes = {
         cardBg: '#1e1e1e',
         text: '#e0e0e0',
         subtleText: '#a0a0a0',
-        headerBg: '#002244',
+        headerBg: '#000000ff',
         headerText: 'white',
         accent: '#0099ff',
         borderColor: '#333',

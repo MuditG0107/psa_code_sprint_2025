@@ -27,15 +27,6 @@ const SupportIcon = () => (
 function App() {
   const currentEmployeeId = "EMP-20001";
 
-  const appStyles = {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-    width: '100%',
-    margin: 0,
-    padding: 0,
-  };
-
   return (
     <>
       <NavigationBar />
@@ -43,8 +34,6 @@ function App() {
     </>
   );
 }
-
-
 
 function NavigationBar() {
     const navStyles = {
