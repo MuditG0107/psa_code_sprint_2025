@@ -40,6 +40,22 @@ class ChatRequest(BaseModel):
     state: Optional[str] = None
     history: List[Dict[str, str]] = []
 
+class Period(BaseModel):
+    start: Optional[str] = None
+    end: Optional[str] = None
+
+class Experience(BaseModel):
+    experience_id: Optional[int] = None # For identifying existing experiences
+    type: str
+    organization: str
+    program: str
+    period: Period
+    focus: str
+
+class UpdateInfoRequest(BaseModel):
+    skills: List[str]
+    experiences: List[Experience]
+
 def get_full_employee_context(cursor, employee_id: str) -> str:
     """Queries all relevant tables to build a comprehensive context string for the AI."""
     
@@ -466,3 +482,64 @@ def chat_with_bot(request_data: ChatRequest):
         "reply": "I'm not sure how to handle that. Let's go back to the main menu.",
         "next_state": "MAIN_MENU"
     }
+
+@app.get("/api/employee/{employee_id}/details")
+def get_employee_details(employee_id: str):
+    """Fetches the specific details an employee can update (skills and experiences)."""
+    cursor = sql_db.cursor()
+    
+    # Fetch skills
+    cursor.execute("""
+        SELECT s.skill_name FROM skills s
+        JOIN employee_skills es ON s.skill_id = es.skill_id
+        WHERE es.employee_id = ?
+    """, employee_id)
+    skills = [row.skill_name for row in cursor.fetchall()]
+
+    # Fetch experiences
+    cursor.execute("SELECT experience_id, experience_type, organization, program_name, start_date, end_date, focus FROM experiences WHERE employee_id = ?", employee_id)
+    experiences_raw = cursor.fetchall()
+    experiences = [
+        {
+            "experience_id": row.experience_id,
+            "type": row.experience_type,
+            "organization": row.organization,
+            "program": row.program_name,
+            "period": {"start": str(row.start_date) if row.start_date else None, "end": str(row.end_date) if row.end_date else None},
+            "focus": row.focus
+        } for row in experiences_raw
+    ]
+    
+    return {"skills": skills, "experiences": experiences}
+
+@app.post("/api/employee/{employee_id}/update")
+def update_employee_details(employee_id: str, data: UpdateInfoRequest):
+    """Updates the employee's skills and experiences in the database."""
+    try:
+        cursor = sql_db.cursor()
+        
+        # 1. Update skills (delete all and re-insert)
+        cursor.execute("DELETE FROM employee_skills WHERE employee_id = ?", employee_id)
+        if data.skills:
+            placeholders = ','.join('?' for _ in data.skills)
+            cursor.execute(f"SELECT skill_id, skill_name FROM skills WHERE skill_name IN ({placeholders})", tuple(data.skills))
+            skill_id_map = {row.skill_name: row.skill_id for row in cursor.fetchall()}
+
+            for skill_name in data.skills:
+                if skill_name in skill_id_map:
+                    skill_id = skill_id_map[skill_name]
+                    cursor.execute("INSERT INTO employee_skills (employee_id, skill_id) VALUES (?, ?)", employee_id, skill_id)
+        
+        # 2. Update experiences (delete all and re-insert)
+        cursor.execute("DELETE FROM experiences WHERE employee_id = ?", employee_id)
+        for exp in data.experiences:
+            cursor.execute(
+                "INSERT INTO experiences (employee_id, experience_type, organization, program_name, start_date, end_date, focus) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                employee_id, exp.type, exp.organization, exp.program, exp.period.start, exp.period.end, exp.focus
+            )
+            
+        sql_db.commit()
+        return {"message": "Profile updated successfully"}
+    except Exception as e:
+        print(f"Update Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update profile.")

@@ -33,7 +33,6 @@ function UserProfileCard({ employeeId }) {
             {error && <p className="error-message">Error: {error}</p>}
             {employee && Object.keys(employee).length > 0 ? (
                 <div className='card-text'>
-                    <h3>{employee.name}</h3>
                     <p><strong>Title:</strong> {employee.job_title}</p>
                     <p><strong>Department:</strong> {employee.department}</p>
                     <p><strong>Manager:</strong> {employee.line_manager}</p>

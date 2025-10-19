@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import UserProfileCard from '../components/UserProfileCard';
-import CareerRecommendations from '../components/CareerRecommendations';
-import ChatbotPage from './ChatbotPage';
-import LeadershipPotentialCard from '../components/LeadershipPotential';
+import ChatbotWidget from '../components/ChatbotWidget';
 
-function DashboardPage({ employeeId, navigateTo }) {
-    // 1. Add state to manage the current theme
+function ChatbotPage({ employeeId }){
     const [theme, setTheme] = useState('dark'); // 'light' or 'dark'
 
     // 2. Function to toggle the theme
@@ -15,31 +11,6 @@ function DashboardPage({ employeeId, navigateTo }) {
     
     // 3. Get the current theme's styles
     const currentStyles = getStyles(theme);
-
-    const [employee, setEmployee] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchEmployeeData = async () => {
-            if (!employeeId) {
-                setLoading(false);
-                setError("No employee ID provided.");
-                return;
-            }
-            try {
-                const response = await fetch(`http://127.0.0.1:8000/api/employee/${employeeId}`);
-                if (!response.ok) throw new Error(`Network response was not ok. Status: ${response.status}`);
-                const data = await response.json();
-                setEmployee(data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchEmployeeData();
-    }, [employeeId]);
 
     return (
         <div class={theme} style={currentStyles.appContainer}>
@@ -51,39 +22,14 @@ function DashboardPage({ employeeId, navigateTo }) {
                 </button>
             </header>
             <div style={currentStyles.dashboardLayout}>
-                {loading && <p>Loading profile...</p>}
-                {error && <p className="error-message">Error: {error}</p>}
-                {employee && Object.keys(employee).length > 0 ? (
-                <div>
-                    <h1 style={{textAlign: 'Left', margin: '50px'}}>Hi, {employee.name}!</h1>
+                <div style={currentStyles.bottomRow}>
+                    <ChatbotWidget employeeId={employeeId} styles={currentStyles} theme={theme} />
                 </div>
-                ): (
-                !loading && !error && <p>No employee data found.</p>
-                )}
-                <div style={currentStyles.topRow}>
-                    <div style={currentStyles.topCard}>
-                        <div style={{marginBottom: '30px'}}>
-                            <UserProfileCard employeeId={employeeId} styles={currentStyles} theme={theme} />
-                        </div>
-                        <div>
-                            <CareerRecommendations employeeId={employeeId} styles={currentStyles} theme={theme} />
-                        </div>
-                    </div>
-                    <div style={currentStyles.topCard}>
-                        <LeadershipPotentialCard employeeId={employeeId} />
-                    </div>
-                </div>
-                <div style={{alignItems: 'center', marginLeft: '15px'}}>
-                    <button className="ai-assistant-button" onClick={() => navigateTo('chatbot')}>
-                        <span>🚀 Launch Your AI Assistant Now</span>
-                    </button>
-                </div>
-
-                
             </div>
         </div>
     );
 }
+
 
 const themes = {
     light: {
@@ -148,7 +94,6 @@ const getStyles = (theme) => ({
     },
     topCard: {
         flex: 1,
-        margin: '20px'
     },
     bottomRow: {
         width: '100%',
@@ -234,4 +179,4 @@ const getStyles = (theme) => ({
     }
 });
 
-export default DashboardPage;
+export default ChatbotPage

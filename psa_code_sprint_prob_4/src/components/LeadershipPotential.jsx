@@ -63,8 +63,8 @@ function LeadershipPotentialCard({ employeeId }) {
             <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
                 Score: {data.score} / 100
             </p>
-            <div style={{ marginTop: '1.5rem' }}>
-                <h4 style={{ marginBottom: '0.5rem' }}>Key Contributing Factors:</h4>
+            <div style={{ marginTop: '1.5rem', textAlign: 'left' }}>
+                <h4 style={{ marginBottom: '0.5rem', textAlign: 'left' }}>Key Contributing Factors:</h4>
                 <ul>
                     {data.positive_factors.map((factor, index) => (
                         <li key={index} style={{ marginBottom: '0.5rem' }}>{factor}</li>

@@ -42,7 +42,7 @@ function ChatbotWidget({ employeeId }) {
                 setMessages([{ sender: 'bot', text: data.reply }]);
                 setConversationState(data.next_state);
             } catch (error) {
-                setMessages([{ sender: 'bot', text: 'Sorry, I couldn\'t connect to the coach right now. Please try again later.' }]);
+                setMessages([{ sender: 'bot', text: 'Sorry, I couldn\'t connect to the server right now. Please try again later.' }]);
             } finally {
                 setIsLoading(false);
             }
