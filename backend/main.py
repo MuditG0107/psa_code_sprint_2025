@@ -553,7 +553,7 @@ def update_employee_details(employee_id: str, data: UpdateInfoRequest):
             skill_id_map = {row.skill_name: row.skill_id for row in cursor.fetchall()}
 
             for skill_name in data.skills:
-                if skill_name in skill_id_map:
+                if skill_name in skill_id_map:  
                     skill_id = skill_id_map[skill_name]
                     cursor.execute("INSERT INTO employee_skills (employee_id, skill_id) VALUES (?, ?)", employee_id, skill_id)
         
