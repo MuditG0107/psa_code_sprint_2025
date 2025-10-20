@@ -4,16 +4,8 @@ import CareerRecommendations from '../components/CareerRecommendations';
 import ChatbotPage from './ChatbotPage';
 import LeadershipPotentialCard from '../components/LeadershipPotential';
 
-function DashboardPage({ employeeId, navigateTo }) {
-    // 1. Add state to manage the current theme
-    const [theme, setTheme] = useState('dark'); // 'light' or 'dark'
-
-    // 2. Function to toggle the theme
-    const toggleTheme = () => {
-        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-    };
+function DashboardPage({ employeeId, navigateTo, theme }) {
     
-    // 3. Get the current theme's styles
     const currentStyles = getStyles(theme);
 
     const [employee, setEmployee] = useState(null);
@@ -43,19 +35,13 @@ function DashboardPage({ employeeId, navigateTo }) {
 
     return (
         <div class={theme} style={currentStyles.appContainer}>
-            <header style={currentStyles.header}>
-                <h1>PSA Employee Growth Platform</h1>
-                {/* 4. Add the theme toggle button */}
-                <button onClick={toggleTheme} style={currentStyles.themeToggleButton}>
-                    Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
-                </button>
-            </header>
+        
             <div style={currentStyles.dashboardLayout}>
                 {loading && <p>Loading profile...</p>}
                 {error && <p className="error-message">Error: {error}</p>}
                 {employee && Object.keys(employee).length > 0 ? (
                 <div>
-                    <h1 style={{textAlign: 'Left', margin: '50px'}}>Hi, {employee.name}!</h1>
+                    <h1 style={{textAlign: 'Left', margin: '20px', marginTop: '-10px', marginBottom: '30px'}}>Hi, {employee.name}!</h1>
                 </div>
                 ): (
                 !loading && !error && <p>No employee data found.</p>
@@ -128,6 +114,7 @@ const getStyles = (theme) => ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        height: '50px'
     },
     themeToggleButton: {
         backgroundColor: themes[theme].accent,

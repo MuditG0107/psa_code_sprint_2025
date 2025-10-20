@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import './App.css'; // Your main stylesheet
+import React, { useState, useEffect } from 'react';
+import './App.css';
 import DashboardPage from './pages/DashboardPage';
 import ChatbotPage from './pages/ChatbotPage';
 import UpdatePage from './pages/UpdatePage';
@@ -26,8 +26,7 @@ const PsaIcon = () => (
 );
 
 
-// --- 2. NAVIGATION BAR Component (Now Functional) ---
-function NavigationBar({ setCurrentPage }) {
+function NavigationBar({ setCurrentPage, toggleTheme, themeToggleButton, theme }) {
     const navStyles = {
         container: {
             display: 'flex',
@@ -74,7 +73,16 @@ function NavigationBar({ setCurrentPage }) {
 
     return (
         <nav style={navStyles.container}>
-            <div style={navStyles.logo} onClick={() => setCurrentPage('dashboard')}><PsaIcon /></div>
+            <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
+              <div style={navStyles.logo} onClick={() => setCurrentPage('dashboard')}>
+                <PsaIcon />
+              </div>
+              <h2>PSA Employee Growth Platform</h2>
+              <button onClick={toggleTheme} style={themeToggleButton}>
+                  Switch to {theme == 'light' ? 'Dark' : 'Light'} Mode
+              </button>
+            </div>
+            
             <div style={navStyles.navLinks}>
                 <button style={navStyles.navButton} onClick={() => setCurrentPage('dashboard')} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}><DashboardIcon /> Dashboard</button>
                 <button style={navStyles.navButton} onClick={() => setCurrentPage('chatbot')} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}><ChatbotIcon /> AI Assistant</button>
@@ -90,26 +98,72 @@ function App() {
     // For prototype we stick to first user, we assume the login is connected to Microsoft login with the domain globalpsa.com
     const currentEmployeeId = "EMP-20001";
 
+    const [theme, setTheme] = useState('dark'); // 'light' or 'dark'
+    const toggleTheme = () => {
+        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    };
+    const currentStyles = getStyles();
+
     // This function determines which page component to render
     const renderPage = () => {
         switch (currentPage) {
             case 'chatbot':
-                return <ChatbotPage employeeId={currentEmployeeId} />;
+                return <ChatbotPage employeeId={currentEmployeeId} theme={theme} />;
             case 'update':
-                return <UpdatePage employeeId={currentEmployeeId} />;
+                return <UpdatePage employeeId={currentEmployeeId} theme={theme} />;
             case 'dashboard':
             default:
-                return <DashboardPage employeeId={currentEmployeeId} navigateTo={setCurrentPage} />;
+                return <DashboardPage employeeId={currentEmployeeId} navigateTo={setCurrentPage} theme={theme} />;
         }
     };
 
     return (
         // Using a React fragment to avoid an extra div that might break styles
         <>
-            <NavigationBar setCurrentPage={setCurrentPage} />
+            <NavigationBar setCurrentPage={setCurrentPage} toggleTheme={toggleTheme} themeToggleButton={currentStyles.themeToggleButton} theme={theme} />
             {renderPage()}
         </>
     );
 }
+
+const themes = {
+    light: {
+        background: '#f4f7f9',
+        cardBg: 'white',
+        text: '#333',
+        subtleText: '#555',
+        headerBg: '#000000ff',
+        headerText: 'white',
+        accent: '#007bff',
+        borderColor: '#e0e0e0',
+        chatAreaBg: '#fafafa',
+        botMessageBg: '#e9ecef',
+    },
+    dark: {
+        background: '#121212',
+        cardBg: '#1e1e1e',
+        text: '#e0e0e0',
+        subtleText: '#a0a0a0',
+        headerBg: '#000000ff',
+        headerText: 'white',
+        accent: '#0099ff',
+        borderColor: '#333',
+        chatAreaBg: '#2a2a2a',
+        botMessageBg: '#333',
+    }
+};
+
+const getStyles = () => ({
+    themeToggleButton: {
+        background: 'linear-gradient(135deg, #2575fc 0%, #6a11cb 100%)',
+        color: 'white',
+        border: 'none',
+        borderRadius: '18px',
+        padding: '0.5rem 1rem',
+        cursor: 'pointer',
+        fontSize: '0.9rem',
+        height: '100%',
+    },
+});
 
 export default App;

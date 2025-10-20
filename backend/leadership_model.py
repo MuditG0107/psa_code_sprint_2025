@@ -6,10 +6,13 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 from datetime import datetime
 
+# --- ONLY RUN THIS FILE IF THE TRAINED MODEL FILES DO NOT EXIST ---
+
+
 # --- 1. Database Connection ---
-# Use the same connection details as your main.py
+# Use the same connection details as your main.py, 
 DB_CONFIG = {
-    'driver': '{ODBC Driver 17 for SQL Server}', # Or another driver like '{ODBC Driver 17 for SQL Server}'
+    'driver': '{ODBC Driver 17 for SQL Server}', 
     'server': r'LAPTOP-PD6OCT58\SQLEXPRESS12',
     'database': 'PSA_Hackathon_2025',
     'Trusted_Connection': 'yes',

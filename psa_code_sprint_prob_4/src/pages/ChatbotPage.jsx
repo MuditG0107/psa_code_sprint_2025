@@ -1,26 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import ChatbotWidget from '../components/ChatbotWidget';
 
-function ChatbotPage({ employeeId }){
-    const [theme, setTheme] = useState('dark'); // 'light' or 'dark'
-
-    // 2. Function to toggle the theme
-    const toggleTheme = () => {
-        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-    };
-    
-    // 3. Get the current theme's styles
+function ChatbotPage({ employeeId, theme }){
     const currentStyles = getStyles(theme);
 
     return (
         <div class={theme} style={currentStyles.appContainer}>
-            <header style={currentStyles.header}>
-                <h1>PSA Employee Growth Platform</h1>
-                {/* 4. Add the theme toggle button */}
-                <button onClick={toggleTheme} style={currentStyles.themeToggleButton}>
-                    Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
-                </button>
-            </header>
+            
             <div style={currentStyles.dashboardLayout}>
                 <div style={currentStyles.bottomRow}>
                     <ChatbotWidget employeeId={employeeId} styles={currentStyles} theme={theme} />

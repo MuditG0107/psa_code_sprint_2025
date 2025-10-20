@@ -58,14 +58,14 @@ const ExperienceForm = ({ onAdd, onCancel }) => {
     );
 };
 
-function UpdatePage({ employeeId }) {
+function UpdatePage({ employeeId, theme }) {
     const [skills, setSkills] = useState([]);
     const [experiences, setExperiences] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [newSkill, setNewSkill] = useState('');
     const [isAddingExperience, setIsAddingExperience] = useState(false);
-    const [theme, setTheme] = useState('dark'); // 'light' or 'dark'
+    
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -123,25 +123,11 @@ function UpdatePage({ employeeId }) {
     if (loading) return <div className="page-content"><p>Loading your profile for editing...</p></div>;
     if (error) return <div className="page-content error-message"><p>Error: {error}</p></div>;
 
-    
-    
-    // 2. Function to toggle the theme
-    const toggleTheme = () => {
-        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-    };
-    
-    // 3. Get the current theme's styles
     const currentStyles = getStyles(theme);
 
     return (
         <div class={theme} style={currentStyles.appContainer}>
-            <header style={currentStyles.header}>
-                <h1>PSA Employee Growth Platform</h1>
-                {/* 4. Add the theme toggle button */}
-                <button onClick={toggleTheme} style={currentStyles.themeToggleButton}>
-                    Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
-                </button>
-            </header>
+            
             <div className="page-content">
                 <h2 className="card-title">Update Your Details</h2>
                 <form onSubmit={handleSubmit} className="update-form">

@@ -2,6 +2,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import pandas as pd
 import pyodbc
 #from openai import AzureOpenAI
 import requests
@@ -10,16 +11,43 @@ import joblib  # For loading the model
 import numpy as np # For data manipulation
 from datetime import datetime # For calculating tenure
 
-# --- Database & API Key Setup ---
-# (Add your database connection details and API key here)
-conn_str = (
-    r'DRIVER={ODBC Driver 17 for SQL Server};' # Or another driver like '{ODBC Driver 17 for SQL Server}'
-    r'SERVER=LAPTOP-PD6OCT58\SQLEXPRESS12;'
-    r'DATABASE=PSA_Hackathon_2025;'
-    r'Trusted_Connection=yes;'
-    r'MARS_Connection=yes;'
-)
-sql_db = pyodbc.connect(conn_str)
+
+def load_config_from_excel(path='../config/config.xlsx'):
+    """Reads configuration details from an Excel file."""
+    try:
+        df = pd.read_excel(path)
+        # Convert the two columns into a Python dictionary
+        config = dict(zip(df['Key'], df['Value']))
+        return config
+    except FileNotFoundError:
+        print("❌ FATAL ERROR: config.xlsx not found. Please create it.")
+        exit()
+    except Exception as e:
+        print(f"❌ FATAL ERROR: Could not read config.xlsx. Error: {e}")
+        exit()
+
+# --- Load Configuration at Startup ---
+config = load_config_from_excel()
+
+try:
+    conn_str = (
+        f"DRIVER={config['DRIVER']};"
+        f"SERVER={config['SERVER']};"
+        f"DATABASE={config['DATABASE']};"
+        "Trusted_Connection=yes;"
+        "MARS_Connection=yes;"
+    )
+    sql_db = pyodbc.connect(conn_str)
+    
+    HACKATHON_API_URL = config['API_URL']
+    HACKATHON_API_KEY = config['API_KEY']
+    
+    print("✅ Configuration loaded successfully from Excel.")
+
+except KeyError as e:
+    print(f"❌ FATAL ERROR: Missing key in config.xlsx: {e}")
+    exit()
+
 
 try:
     model = joblib.load('leadership_model.pkl')
@@ -30,8 +58,7 @@ except FileNotFoundError:
     scaler = None
     print("⚠️ WARNING: leadership_model.pkl or scaler.pkl not found. Prediction endpoint will not work.")
 
-HACKATHON_API_URL = "https://psacodesprint2025.azure-api.net/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-01-01-preview"
-HACKATHON_API_KEY = "ae8a38fbbef5413dab639f0355ede6a8" 
+
 
 # This tells FastAPI exactly what the JSON body should look like.
 class ChatRequest(BaseModel):
@@ -233,7 +260,7 @@ def chat_with_bot(request_data: ChatRequest):
 
     # --- 1. MENTAL WELL-BEING KEYWORD DETECTION ---
     # This check happens on every message, regardless of the conversation state.
-    mental_wellbeing_keywords = ["stress", "anxious", "overwhelmed", "burnt out", "unhappy", "sad"]
+    mental_wellbeing_keywords = ["stress", "anxious", "overwhelmed", "burnt out", "unhappy", "sad", "depressed"]
     if any(keyword in message.lower() for keyword in mental_wellbeing_keywords) and state != "SUPPORT_MODE":
         print("--- Mental well-being keyword detected. Entering support mode. ---")
         
@@ -263,7 +290,7 @@ def chat_with_bot(request_data: ChatRequest):
             
         # This system prompt is for being a supportive listener.
         system_prompt = (
-            "You are a compassionate and supportive AI assistant for PSA. Your primary role is to be an empathetic listener. "
+            "You are a compassionate and supportive AI assistant for PSA Corporation Limited, now known as PSA International, is a leading global port operator that manages a vast network of port terminals, rail, and inland terminals in over 180 locations across 45 countries. It is a major player in global trade, operating the world's largest container transhipment hub in Singapore and offering a range of services beyond port operations, including logistics and digital supply chain solutions. Your primary role is to be an empathetic listener. "
             "STRICT RULES: Acknowledge and validate the user's feelings (e.g., 'That sounds really difficult,' 'I'm sorry to hear you're feeling that way'). "
             "DO NOT give advice. DO NOT act like a therapist. DO NOT ask probing questions. "
             "You can ask gentle, open-ended questions like 'Is there anything else you'd like to share?' or simply say 'Thank you for sharing.' "
@@ -271,7 +298,7 @@ def chat_with_bot(request_data: ChatRequest):
         )
         
         resources_text = (
-            "Here are some confidential resources available to you anytime:\n"
+            "Here are some confidential resources (dummy data) available to you anytime:\n"
             "- **PSA HR Support Line:** +65 12345678\n"
             "- **Employee Assistance Program (EAP) Helpline:** +65 98765432\n"
             "- **Email HR Wellness Team:** hr_wellness@globalpsa.com"
@@ -363,7 +390,7 @@ def chat_with_bot(request_data: ChatRequest):
             print("--- Making a call to the external AI for a general query ---")
             employee_context = get_full_employee_context(cursor, employee_id)
             system_prompt = (
-                "You are an expert career coach for PSA. You must follow these rules strictly:\n"
+                "You are an expert career coach for PSA Corporation Limited, now known as PSA International, is a leading global port operator that manages a vast network of port terminals, rail, and inland terminals in over 180 locations across 45 countries. It is a major player in global trade, operating the world's largest container transhipment hub in Singapore and offering a range of services beyond port operations, including logistics and digital supply chain solutions. You must follow these rules strictly:\n"
                 "1. **Be concise:** Keep your answers short and directly to the point.\n"
                 "2. **Answer ONLY the user's direct question:** Do not add extra information, suggestions, or recommendations unless the user explicitly asks for them.\n"
                 "3. **Use the provided context:** Use the employee profile below to inform your answer, but do not simply repeat it.\n"
@@ -460,7 +487,7 @@ def chat_with_bot(request_data: ChatRequest):
         return {"reply": reply, "next_state": "AWAITING_RESOURCE_REQUEST"}
     
     elif state == "AWAITING_RESOURCE_REQUEST":
-        affirmative_responses = ["yes", "ok", "sure", "please", "yeah"]
+        affirmative_responses = ["yes", "ok", "sure", "please", "yeah", "yep", "why not", "give it"]
         if any(word in message.lower() for word in affirmative_responses):
             # In a real system, you could query a database of learning materials here.
             reply = "Great! I recommend checking out the **PSA Learning Hub** for internal courses on these topics. You can also look for relevant projects on the internal opportunities board to get hands-on experience."

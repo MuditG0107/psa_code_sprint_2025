@@ -85,6 +85,7 @@ function ChatbotWidget({ employeeId }) {
     return (
         <div className="card chatbot-container">
             <h2 className="card-title">Your AI Assistant</h2>
+            <p>Talk to me for your career support, mental-well-being or just a simple chat!</p>
             <div style={{height: "80vh", overflowY: "auto", padding: "1rem", border: "1px solid #ccc", borderRadius: "8px"}} className="chat-messages">
                 {messages.map((msg, index) => (
                     <div key={index} className={`message ${msg.sender === 'user' ? 'user-message' : 'bot-message'}`}>
